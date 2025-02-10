@@ -4,3 +4,80 @@ author: "Laavanya Joshi"
 date: "2025-02-10"
 output: html_document
 ---
+
+```{r}
+library(parallel)
+library(foreach)
+library(iterators)
+library(doParallel)
+```
+
+
+```{r}
+detectCores()
+```
+
+### My system has 8 cores.
+
+```{r}
+beforetime <- Sys.time()
+
+for(i in 1:4000){
+  mean(rnorm(100000), mean= 10, sd = 3)
+}
+
+aftertime <- Sys.time()
+
+(timediff = aftertime - beforetime)
+
+```
+
+### It took about 20-30 seconds.
+
+### Since I have 8 cores, a multi-threaded program should take about 4-5 seconds, not 30s.
+
+```{r}
+timediff/8
+```
+
+```{r}
+Cores <- makeCluster(detectCores()-1)
+registerDoParallel(Cores)
+```
+
+
+```{r}
+beforetime2 <- Sys.time()
+
+foreach(i=1:4000, .combine=rbind) %dopar%
+print(i)
+
+aftertime2 <- Sys.time()
+
+(timediff2 = aftertime2 - beforetime2)
+```
+
+
+### The serial loop took 29.7 s to run, my predicted runtime for a parallel loop was 4-5 s, and the actual parallel loop took 3.6s. The theoretical run-time was slightly longer than the actual run-time
+
+```{r}
+stopCluster(Cores)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
