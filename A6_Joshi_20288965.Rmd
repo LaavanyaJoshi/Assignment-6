@@ -1,0 +1,89 @@
+---
+title: "Assignment 6"
+author: "Laavanya Joshi"
+date: "2025-02-10"
+output: html_document
+---
+
+
+## [Assignment6Github](https://github.com/LaavanyaJoshi/Assignment-6)
+
+
+```{r}
+library(parallel)
+library(foreach)
+library(iterators)
+library(doParallel)
+```
+
+
+```{r}
+detectCores()
+```
+
+### My system has 8 cores.
+
+
+```{r}
+beforetime <- Sys.time()
+
+for(i in 1:4000){
+  mean(rnorm(100000), mean = 10, sd = 3)
+}
+
+aftertime <- Sys.time()
+
+(timediff = aftertime - beforetime)
+```
+
+
+### It took about 16 seconds.
+
+
+### Since I have 8 cores, a multi-threaded program should take about 2-3 seconds, not 30s.
+
+```{r}
+timediff/8
+```
+
+
+### If the parallel computation must be run with 1 less than my total number of cores, the theoretical time can be re-calculated.
+
+```{r}
+timediff/7
+```
+
+
+```{r}
+Cores <- makeCluster(detectCores()-1)
+registerDoParallel(Cores)
+```
+
+
+```{r, echo=T, results="hide"}
+beforetime2 <- Sys.time()
+
+foreach(i=1:4000, .combine=rbind) %dopar%
+  mean(rnorm(100000), mean = 10, sd = 3)
+
+aftertime2 <- Sys.time()
+```
+
+
+```{r}
+(timediff2 = aftertime2 - beforetime2)
+```
+
+
+```{r}
+stopCluster(Cores)
+```
+
+
+### The serial loop took 16s to run, my predicted runtime for a parallel loop was 3s, and the actual parallel loop took 6.3s, meaning the theoretical run-time was shorter than the actual run-time.
+
+### There are a number of reasons for this time discrepancy. The elapsed time may be different based on how soon after the loop function it is calculated. There may be basic overhang by the computer when running the loop, due to other applications running or that my computer is 4 years old. It may also take extra time for the computer to access the memory and then run the loop itself. Ultimately, this all adds a lot of extra runtime, even with additional cores.
+
+### Furthermore, knitting the document itself takes extra time, so the time differences may be re-calculated and slightly different from my original runs of the code.
+
+
